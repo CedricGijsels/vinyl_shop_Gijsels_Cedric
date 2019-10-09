@@ -11,6 +11,12 @@
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
+Route::get('contact-us', function () {
+    //return 'Contact info';
+    return view('contact');
+});
+
+Route::prefix('admin')->group(function () {
+    Route::redirect('/', 'records');
+    Route::get('records', 'Admin\RecordController@index');
 });
