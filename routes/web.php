@@ -11,12 +11,25 @@
 |
 */
 
-Route::get('contact-us', function () {
-    //return 'Contact info';
-    return view('contact');
-});
+Route::view('/', 'home');
+Route::view('contact-us', 'contact');
 
+// Old version
+/*
+Route::get('admin/records', function (){...});
+*/
+
+// New version with prefix and group
 Route::prefix('admin')->group(function () {
     Route::redirect('/', 'records');
-    Route::get('records', 'Admin\RecordController@index');
+    Route::get('records', function (){
+        $records = [
+            'Queen - Greatest Hits',
+            'The Rolling Stones - Sticky Fingers',
+            'The Beatles - Abbey Road'
+        ];
+        return view('admin.records.index', [
+            'records' => $records
+        ]);
+    });
 });

@@ -1,10 +1,16 @@
-<h1>Records</h1>
+@extends('layouts.template')
 
-<ul>
-    <?php
-    foreach ($records as $record){
-        echo "<li> $record </li>";
-        //echo '<li>' . $record . '</li>';
-    }
-    ?>
-</ul>
+@section('title', 'Welcome to The Vinyl Shop')
+
+@section('main')
+    <h1>Records</h1>
+
+    <ul>
+        <?php
+        foreach ($records as $record){
+            echo "<li> $record </li>";
+            //echo '<li>' . $record . '</li>';
+        }
+        ?>
+    </ul>
+@endsection
