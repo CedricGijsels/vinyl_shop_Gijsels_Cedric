@@ -11,25 +11,20 @@
 |
 */
 
+Auth::routes();
+// Route::get('/home', 'HomeController@index')->name('home');
 Route::view('/', 'home');
-Route::view('contact-us', 'contact');
-
-// Old version
-/*
-Route::get('admin/records', function (){...});
-*/
-
-// New version with prefix and group
-Route::prefix('admin')->group(function () {
+Route::get('shop', 'ShopController@index');
+Route::get('shop/{id}', 'ShopController@show');
+Route::get('contact-us', 'ContactUsController@show');
+Route::post('contact-us', 'ContactUsController@sendEmail');
+Route::prefix('admin')->group(function(){
     Route::redirect('/', 'records');
-    Route::get('records', function (){
-        $records = [
-            'Queen - Greatest Hits',
-            'The Rolling Stones - Sticky Fingers',
-            'The Beatles - Abbey Road'
-        ];
-        return view('admin.records.index', [
-            'records' => $records
-        ]);
-    });
+    Route::get('records', 'Admin\RecordController@index');
 });
+Route::get('shop_alt', 'ShopController@index_alt');
+
+
+Auth::routes();
+
+Route::get('/home', 'HomeController@index')->name('home');

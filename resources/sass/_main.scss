@@ -1,0 +1,17 @@
+//ccs_after
+cardShopMaster (
+
+)
+
+
+
+
+@section('css_after')
+<style>
+.card {
+  cursor: pointer;
+}
+.card .btn, form .btn {
+  display: none;
+}
+</style>
