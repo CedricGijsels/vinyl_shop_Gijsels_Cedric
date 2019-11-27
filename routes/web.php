@@ -23,8 +23,3 @@ Route::prefix('admin')->group(function(){
     Route::get('records', 'Admin\RecordController@index');
 });
 Route::get('shop_alt', 'ShopController@index_alt');
-
-
-Auth::routes();
-
-Route::get('/home', 'HomeController@index')->name('home');
