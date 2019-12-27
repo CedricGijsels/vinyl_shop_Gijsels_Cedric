@@ -15,3 +15,7 @@ cardShopMaster (
   display: none;
 }
 </style>
+
+  .btn[disabled] {
+    cursor: not-allowed;
+  }

@@ -20,8 +20,9 @@ Route::get('contact-us', 'ContactUsController@show');
 Route::post('contact-us', 'ContactUsController@sendEmail');
 Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::redirect('/', 'records');
+    Route::get('genres/qryGenres', 'Admin\GenreController@qryGenres');
     Route::resource('genres', 'Admin\GenreController');
-    Route::get('records', 'Admin\RecordController@index');
+    Route::resource('records', 'Admin\RecordController');
 });
 Route::get('shop_alt', 'ShopController@index_alt');
 Route::get('logout', 'Auth\LoginController@logout');
