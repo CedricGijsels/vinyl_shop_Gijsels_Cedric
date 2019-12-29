@@ -44,9 +44,11 @@
                     // Show toast
                     new Noty({
                         type: 'error',
+                        //error
                         text: `No cover found via ${from}!<br>Use Google and add a valid (local) URL in the Cover URL field.`
                     }).show();
                 });
         }
     });
 </script>
+
