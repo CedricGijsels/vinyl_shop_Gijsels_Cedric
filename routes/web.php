@@ -23,6 +23,7 @@ Route::middleware(['auth', 'admin'])->prefix('admin')->group(function () {
     Route::get('genres/qryGenres', 'Admin\GenreController@qryGenres');
     Route::resource('genres', 'Admin\GenreController');
     Route::resource('records', 'Admin\RecordController');
+    Route::resource('users', 'Admin\UserController');
 });
 Route::get('shop_alt', 'ShopController@index_alt');
 Route::get('logout', 'Auth\LoginController@logout');
@@ -32,4 +33,9 @@ Route::middleware(['auth'])->prefix('user')->group(function () {
     Route::post('profile', 'User\ProfileController@update');
     Route::get('password', 'User\PasswordController@edit');
     Route::post('password', 'User\PasswordController@update');
+});
+Route::redirect('users', '/users/index');
+Route::middleware(['auth'])->prefix('users')->group(function () {
+    Route::get('edit', 'Admin\UserController@edit');
+    Route::post('edit', 'Admin\UserController@update');
 });

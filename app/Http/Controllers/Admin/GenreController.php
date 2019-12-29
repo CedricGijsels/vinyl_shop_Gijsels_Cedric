@@ -87,8 +87,8 @@ class GenreController extends Controller
         $genre->name = $request->name;
         $genre->save();
         return response()->json([
-            'type' => 'success',
-            'text' => "The genre <b>$genre->name</b> has been updated"
+        'type' => 'success',
+        'text' => "The genre <b>$genre->name</b> has been updated"
         ]);
     }
 

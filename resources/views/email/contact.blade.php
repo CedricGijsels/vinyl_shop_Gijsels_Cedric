@@ -1,13 +1,13 @@
 @component('mail::message')
     # Dear {{ $request->name }},
-    Thanks for you message.<br>
+    Thanks for you message.
     We'll contact you as soon as possible.
 
-    <hr>
-    <b>Your name:</b> {{ $request->name }}<br>
-    <b>Your email:</b> {{ $request->email }}<br>
-    <b>Your message:</b><br>{{ $request->message }}
 
-    Thanks,<br>
+    Your name: {{ $request->name }}
+    Your email: {{ $request->email }}
+    Your message:{{ $request->message }}
+
+    Thanks,
     {{ env('APP_NAME') }}
 @endcomponent
