@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers\Admin;
 
+
+use App\Helpers\Json;
 use App\User;
-use Facades\App\Helpers\Json;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+
 
 class UserController extends Controller
 {
@@ -14,14 +16,56 @@ class UserController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        $users = User::orderBy('name')
-            ->get();
-        $result = compact('users');
-        Json::dump($result);
+        $sort_id = $request->input('sort');
+        $text_sort = '%' . $request->input('name') . '%';
+        if ($sort_id == 0){
+            $users = User::orderBy('name','asc')
+                ->where('name','like',$text_sort)
+                ->where('email','like',$text_sort)
+                ->paginate(10) //Sorted by ID, All users 10/page
+                ->appends(['name'=> $request->input('name'), 'email'=> $request->input('name')]);
+        } if ($sort_id == 1){
+        $users = User::orderBy('name','desc')
+            ->where('name','like',$text_sort)
+            ->where('email','like',$text_sort)
+            ->paginate(10) //Sorted by ID, All users 10/page
+            ->appends(['name'=> $request->input('name'), 'email'=> $request->input('name')]);
+    } if ($sort_id == 2){
+        $users = User::orderBy('email','asc')
+            ->where('name','like',$text_sort)
+            ->where('email','like',$text_sort)
+            ->paginate(10) //Sorted by ID, All users 10/page
+            ->appends(['name'=> $request->input('name'), 'email'=> $request->input('name')]);
+    }  if ($sort_id == 3){
+        $users = User::orderBy('email','desc')
+            ->where('name','like',$text_sort)
+            ->where('email','like',$text_sort)
+            ->paginate(10) //Sorted by ID, All users 10/page
+            ->appends(['name'=> $request->input('name'), 'email'=> $request->input('name')]);
+    } if ($sort_id == 4){
+        $users = User::orderBy('id')
+            ->where('name','like',$text_sort)
+            ->where('email','like',$text_sort)
+            ->where('active','like','%0%')
+            ->paginate(10) //Sorted by ID, All users 10/page
+            ->appends(['name'=> $request->input('name'), 'email'=> $request->input('name')]);
+    }if ($sort_id == 5){
+        $users = User::orderBy('id','desc')
+            ->where('name','like',$text_sort)
+            ->where('email','like',$text_sort)
+            ->where('admin','like','%1%')
+            ->paginate(10) //Sorted by ID, All users 10/page
+            ->appends(['name'=> $request->input('name'), 'email'=> $request->input('name')]);
+    }
+
+        $users1 = User::orderBy('name','asc')->get(); //name A-Z
+        $result = compact('users1','users');
+        (new Json())->dump($result);
         return view('admin.users.index', $result);
     }
+
 
     /**
      * Show the form for creating a new resource.
@@ -30,7 +74,7 @@ class UserController extends Controller
      */
     public function create()
     {
-        return redirect('admin.users');
+        //
     }
 
     /**
@@ -64,7 +108,7 @@ class UserController extends Controller
     public function edit(User $user)
     {
         $result = compact('user');
-        Json::dump($result);
+        (new Json())->dump($result);
         return view('admin.users.edit', $result);
     }
 
@@ -77,24 +121,30 @@ class UserController extends Controller
      */
     public function update(Request $request, User $user)
     {
-        if ($request->email != $user->email){
-            $this->validate($request,[
-                'name' => 'required',
-                'email' => 'required|email|unique:users,email,' . auth()->id()
-            ]);
-        } else {
-            $this->validate($request,[
-                'name' => 'required'
-            ]);
-        }
+        $this->validate($request,[
+            'name' => 'required|min:3|unique:users,name,' . $user->id,
+            'email' => 'required|min:3|unique:users,email,' . $user->id,
 
+        ]);
         $user->name = $request->name;
         $user->email = $request->email;
-        $user->active = $request->active;
-        $user->admin = $request->admin;
+        $admin_test = $request->admin;
+        $active_test = $request->active;
+
+        if ($active_test != 1){
+            $user->active = 0;
+        } else {
+            $user->active = $active_test;
+        }
+
+        if ($admin_test != 1){
+            $user->admin = 0;
+        } else {
+            $user->admin = $admin_test;
+        }
         $user->save();
-        session()->flash('success', "The user: <b>$user->name</b> has been updated");
-        return redirect("/admin/users");
+        session()->flash('success', "<b>$user->name</b> has been updated");
+        return redirect('admin/users');
     }
 
     /**
@@ -103,18 +153,21 @@ class UserController extends Controller
      * @param  \App\User  $user
      * @return \Illuminate\Http\Response
      */
+
     public function destroy(User $user)
     {
-        $user->delete();
-        session()->flash('success', "The genre <b>$user->name</b> has been deleted");
-        return redirect('admin/users');
+        if ($user->admin != 1){
+            $user->delete();
+            return response()->json([
+                'type' => 'success',
+                'text' => "The user <b>$user->name</b> has been deleted"
+            ]);
+        } else {
+            return response()->json([
+                'type' => 'error',
+                'text' => "The user <b>$user->name</b> Will not be deleted in order to not exclude yourself from the website"
+            ]);
+        }
     }
 
-    public function qryUsers()
-    {
-        $users = User::orderBy('name')
-            ->withCount('records')
-            ->get();
-        return $users;
-    }
 }

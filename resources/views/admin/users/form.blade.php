@@ -21,11 +21,11 @@
         <div class="form-group">
             <br>
             <input type="hidden" id="active" value="0" />
-            <input type="checkbox" name="active" id="active" value="1"/> Active
+            <input type="checkbox" name="active" id="active" value="1" checked/> Active
             <br>
             <br>
             <input type="hidden" id="admin" value="0" />
-            <input type="checkbox" name="admin" id="admin" value="1"/> Admin
+            <input type="checkbox" name="admin" id="admin" value="1" checked/> Admin
         </div>
         <p>
             <button type="submit" id="submit" class="btn btn-success">Save user</button>
@@ -33,11 +33,11 @@
     </div>
 </div>
 <script>
-    @if($user->active=='1')
+    @if($user->active==1)
         $('#active').prop('checked', true);
         @endif
 
-    @if($user->admin=='1')
+    @if($user->admin==1)
         $('#admin').prop('checked', true);
         @endif
 </script>

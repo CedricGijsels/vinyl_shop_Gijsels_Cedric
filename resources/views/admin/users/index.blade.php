@@ -4,7 +4,35 @@
 
 @section('main')
     <h1>Users</h1>
-
+    @include('shared.alert')
+    <form method="get" action="/admin/users" id="searchForm">
+        <div class="row">
+            <div class="col-sm-8 mb-2">
+                <input type="text" class="form-control" name="name" id="name"
+                       value="{{ request()->user }}"
+                       placeholder="Filter Name Or Email">
+            </div>
+            <div class="col-sm-4 mb-2">
+                <select class="form-control" name="sort" id="sort">
+                    <option value="0">Name (A=>Z)</option>
+                    <option value="1">Name (Z=>A)</option>
+                    <option value="2">Email (A=>Z)</option>
+                    <option value="3">Email (Z=>A)</option>
+                    <option value="4">Not Active</option>
+                    <option value="5">Admin</option>
+                </select>
+            </div>
+        </div>
+    </form>
+    <hr>
+    @if ($users->count() == 0)
+        <div class="alert alert-danger alert-dismissible fade show">
+            Can't find any user with <b>'{{ request()->name }}'</b> for this search
+            <button type="button" class="close" data-dismiss="alert">
+                <span>&times;</span>
+            </button>
+        </div>
+    @endif
     <div class="table-responsive">
         <table class="table">
             <thead>
@@ -19,69 +47,85 @@
             </thead>
             <tbody>
             @foreach($users as $user)
-
                 <tr>
                     <td>{{ $user->id }}</td>
                     <td>{{ $user->name }}</td>
-                    <td>{{ $user->email }}</td>
-                    <td>@if  ($user->active == "1") <p>✔</p> @else <p></p> @endif </td>
-                    <td>@if  ($user->admin == "1") <p>✔</p> @else <p></p> @endif </td>
+                    <td>{{$user->email}}</td>
+                    <td id="icon">{{$user->active}}</td>
+                    <td id="icon">{{$user->admin}}</td>
                     <td>
-                        <div class="btn-group btn-group-sm @if($user == auth()-> user()) notusable @endif">
-                            <a href="/admin/users/{{ $user->id }}/edit" class="btn btn-outline-success btn-edit
-                                   @if($user == auth()->user()) disabled @endif"
-                               data-toggle="tooltip" title="Edit {{$user->name}}">
-                                <i class="fas fa-edit"></i>
-                            </a>
-                            <a href="#!" class="btn btn-outline-danger btn-delete @if($user == auth()->user()) disabled @endif"
-                               data-toggle="tooltip" title="Delete {{$user->name}}"
-                               data-id="{{$user->id}}"
-                               data-name="{{$user->name}}">
-                                <i class="fas fa-trash-alt"></i>
-                            </a>
-                        </div>
+                        <form action="/admin/users/{{ $user->id }}" method="post" class="deleteForm">
+                            @method('delete')
+                            @csrf
+                            <div class="btn-group btn-group-sm">
+                                <a href="/admin/users/{{ $user->id }}/edit" class="btn btn-outline-success"
+                                   data-toggle="tooltip"
+                                   title="Edit {{ $user->name }}">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-danger"
+                                        data-toggle="tooltip"
+                                        @if($user->admin == 1) disabled @endif
+                                        data-username="{{$user->name}}"
+                                        data-id="{{$user->id}}"
+                                        title="Delete {{ $user->name }}">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </div>
+                        </form>
                     </td>
                 </tr>
             @endforeach
             </tbody>
         </table>
     </div>
-
+    {{--Page Selector van Paginate--}}
+    {{ $users->links() }}
 @endsection
-
-@section('script_after')
+@section("script_after")
     <script>
+
+        /*Enable bootstrap Tooltips*/
+        $(function(){
+            $('body').tooltip({
+                selector: '[data-toggle="tooltip"]',
+                html : true,
+            });
+        });
+        /*End Enable bootstrap Tooltips*/
+
+        /*Change to Checkmarks*/
         $(function () {
-            loadTable();
-
-            $('tbody').on('click', '.btn-delete', function () {
-                // Get data attributes from td tag
-                let id = $(this).closest('td').data('id');
-                let name = $(this).closest('td').data('name');
-                let records = $(this).closest('td').data('records');
-                // Set some values for Noty
-                let text = `<p>Delete the genre <b>${name}</b>?</p>`;
-                let type = 'warning';
-                let btnText = 'Delete user';
-                let btnClass = 'btn-success';
-                // If records not 0, overwrite values for Noty
-                if (records > 0) {
-                    text += `<p>ATTENTION: you are going to delete ${records} records at the same time!</p>`;
-                    btnText = `Delete genre + ${records} records`;
-                    btnClass = 'btn-danger';
-                    type = 'error';
+            const listItems = document.querySelectorAll('#icon')
+            var i;
+            for (i = 0; i < listItems.length; i++) {
+                if (listItems[i].textContent == 1) {
+                    listItems[i].outerHTML = "<td><i class=\"fas fa-check\"></i></td>";
+                } else {
+                    listItems[i].textContent = " ";
                 }
+            }
+        });
+        /*End Change to Checkmarks*/
 
-                // Show Noty
+        /*Delete a User*/
+        $(function () {
+            $('.deleteForm button').click(function () {
+                let username = $(this).data('username');
+                let id = $(this).data('id');
+                let text = <p>Delete <b>${username}</b>?</p>;
+                let form = $(this).closest('form');
+
+                // show Noty
                 let modal = new Noty({
-                    timeout: false,
+                    timeout : false,
                     layout: 'center',
                     modal: true,
-                    type: type,
+                    type: 'warning',
                     text: text,
                     buttons: [
-                        Noty.button(btnText, `btn ${btnClass}`, function () {
-                            // Delete genre and close modal
+                        Noty.button('Delete user', ' btn btn-success', function () {
+                            //Delete user and close modal
                             deleteUser(id);
                             modal.close();
                         }),
@@ -90,69 +134,15 @@
                         })
                     ]
                 }).show();
-            });
-            $('tbody').on('click', '.btn-edit', function () {
-                // Get data attributes from td tag
-                let id = $(this).closest('td').data('id');
-                let name = $(this).closest('td').data('name');
-                // Update the modal
-                $('.modal-title').text(`Edit ${name}`);
-                $('form').attr('action', `/admin/users/${id}`);
-                $('#name').val(name);
-                $('input[name="_method"]').val('put');
-                // Show the modal
-                $('#modal-genre').modal('show');
-            });
-            $('#modal-genre form').submit(function (e) {
-                // Don't submit the form
-                e.preventDefault();
-                // Get the action property (the URL to submit)
-                let action = $(this).attr('action');
-                // Serialize the form and send it as a parameter with the post
-                let pars = $(this).serialize();
-                console.log(pars);
-                // Post the data to the URL
-                $.post(action, pars, 'json')
-                    .done(function (data) {
-                        console.log(data);
-                        // Noty success message
-                        new Noty({
-                            type: data.type,
-                            text: data.text
-                        }).show();
-                        // Hide the modal
-                        $('#modal-genre').modal('hide');
-                        // Rebuild the table
-                        loadTable();
-                    })
-                    .fail(function (e) {
-                        console.log('error', e);
-                        // e.responseJSON.errors contains an array of all the validation errors
-                        console.log('error message', e.responseJSON.errors);
-                        // Loop over the e.responseJSON.errors array and create an ul list with all the error messages
-                        let msg = '<ul>';
-                        $.each(e.responseJSON.errors, function (key, value) {
-                            msg += `<li>${value}</li>`;
-                        });
-                        msg += '</ul>';
-                        // Noty the errors
-                        new Noty({
-                            type: 'error',
-                            text: msg
-                        }).show();
-                    });
-            });
-        });
-
-        // Delete a user
-        function deleteUser(id) {
-            // Delete the user from the database
-            let pars = {
-                '_token': '{{ csrf_token() }}',
-                '_method': 'delete'
-            };
-            $.post(`/admin/users/${id}`, pars, 'json')
-                .done(function (data) {
+            })
+            function deleteUser(id) {
+                // Delete the user from the database
+                let pars = {
+                    '_token': '{{ csrf_token() }}',
+                    '_method': 'delete'
+                };
+                $.post(/admin/users/${id}, pars, 'json')
+            .done(function (data) {
                     console.log('data', data);
                     // Show toast
                     new Noty({
@@ -162,9 +152,12 @@
                     // Rebuild the table
                     loadTable();
                 })
-                .fail(function (e) {
-                    console.log('error', e);
-                });
-        }
+                    .fail(function (e) {
+                        console.log('error', e);
+                        console.log('error', e.responseJSON.errors);
+                    });
+            }
+        });
+        /*End Delete User*/
     </script>
 @endsection
