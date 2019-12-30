@@ -113,7 +113,7 @@
             $('.deleteForm button').click(function () {
                 let username = $(this).data('username');
                 let id = $(this).data('id');
-                let text = <p>Delete <b>${username}</b>?</p>;
+                let text = `<p>Delete <b>${username}</b>?</p>`;
                 let form = $(this).closest('form');
 
                 // show Noty
@@ -141,7 +141,7 @@
                     '_token': '{{ csrf_token() }}',
                     '_method': 'delete'
                 };
-                $.post(/admin/users/${id}, pars, 'json')
+                $.post(`/admin/users/${id}`, pars, 'json')
             .done(function (data) {
                     console.log('data', data);
                     // Show toast
